@@ -132,12 +132,12 @@ int exec_cmd(){
 }
 
 
-int exec_mem_right(){}
-int exec_mem_left(){}
-int exec_getchar(){}
-int exec_putchar(){}
-int exec_inc_mem(){}
-int exec_dec_mem(){}
-int exec_putnum(){}
+int exec_mem_right(){ptr++;}
+int exec_mem_left(){ptr--;}
+int exec_getchar(){*ptr=getchar();}
+int exec_putchar(){putchar(*ptr);}
+int exec_inc_mem(){++*ptr;}
+int exec_dec_mem(){--*ptr;}
+int exec_putnum(){printf("%d ",*ptr);}
 int exec_from(){}
 int exec_to(){}
