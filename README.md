@@ -10,7 +10,7 @@ brainfuck language synopsis:
 >  ptr++
 - *ptr--
 + *ptr++
-[ while(*ptr>0){....
+\[ while(*ptr>0){....
 ] ...}while(*ptr>0)
 , *ptr = getchar();
 . putchar(*ptr);
