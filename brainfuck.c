@@ -132,23 +132,70 @@ int exec_cmd(){
 }
 
 
-int exec_mem_right(){ptr++;}
-int exec_mem_left(){ptr--;}
-int exec_getchar(){*ptr=getchar();}
-int exec_putchar(){putchar(*ptr);}
-int exec_inc_mem(){++*ptr;}
-int exec_dec_mem(){--*ptr;}
-int exec_putnum(){printf("%d ",*ptr);}
+int exec_mem_right(){ptr++;return EXEC_CONTINUE;}
+int exec_mem_left(){ptr--;return EXEC_CONTINUE;}
+int exec_getchar(){*ptr=getchar();return EXEC_CONTINUE;}
+int exec_putchar(){putchar(*ptr);return EXEC_CONTINUE;}
+int exec_inc_mem(){++*ptr;return EXEC_CONTINUE;}
+int exec_dec_mem(){--*ptr;return EXEC_CONTINUE;}
+int exec_putnum(){printf("%d ",*ptr);return EXEC_CONTINUE;}
 int exec_from(){
     /*if *ptr=0 skip to matching closing bracket*/
     if(0==*ptr){
         cmd=seek_closing_bracket();
+        if(NULL==cmd)
+            return EXEC_STOPPED_ERR;
     }
+    return EXEC_CONTINUE;
 }
 
 int exec_to(){
     /*if *ptr!=0 seek backwards matching opening bracket*/
     if(0!=*ptr){
         cmd=seek_opening_bracket();
+        if(NULL==cmd)
+            return EXEC_STOPPED_ERR;
     }
+    return EXEC_CONTINUE;
+}
+
+/*
+*simple dirty seek matching bracket
+*can be replaced by pre execution indexed jump table
+*/
+char*seek_opening_bracket(){
+    char*tmp=cmd;
+    int scope=1;
+    while(scope!=0){
+        tmp--;
+        /*seek<start? underrun by mismatched bracket*/
+        if(tmp<=code){
+            fprintf(stderr,"missing opening bracket (%ld);\n",(long)(cmd-code));
+            execution_state=EXEC_STOPPED_ERR;
+            return NULL;
+        }
+        switch(*tmp){
+            case ']':scope++;break;
+            case '[':scope--;break;
+        }
+    }
+    return tmp;
+}
+
+/*simple dirty seek matching*/
+char*seek_closing_bracket(){
+    char*tmp=cmd;
+    int scope=1;
+
+    while(scope!=0){
+        tmp++;
+        switch(*tmp){
+            case ']':scope--;break;
+            case '[':scope++;break;
+            case EOF:
+                fprintf(stderr,"missing closing bracket (%ld);\n",(long)(cmd-code));
+                return NULL;
+        }
+    }
+    return tmp;  
 }
