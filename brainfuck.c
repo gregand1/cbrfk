@@ -5,6 +5,11 @@
 #define EXEC_STOPPED_OK
 #define EXEC_STOPPED_ERR
 
+void read_program();
+int execute();
+int exec_cmd();
+
+
 
 int verbose=0;
 char execution_state=EXEC_CONTINUE
