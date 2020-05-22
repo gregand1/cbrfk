@@ -17,9 +17,12 @@ int exec_dec_mem();
 int exec_putnum();
 int exec_from();
 int exec_to();
+char*seek_closing_bracket();
+char*seek_opening_bracket();
+void zeros(char*arr,size_t len);
 
 int verbose=0;
-char execution_state=EXEC_CONTINUE
+char execution_state=EXEC_CONTINUE;
 /*extend by that much the code/data arrays when needed*/
 size_t block_size=4096;
 
@@ -199,3 +202,7 @@ char*seek_closing_bracket(){
     }
     return tmp;  
 }
+
+
+
+void zeros(char*arr,size_t len){while(len-->0){arr[len]=0;}}
