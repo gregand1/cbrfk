@@ -135,13 +135,41 @@ int exec_cmd(){
 }
 
 
-int exec_mem_right(){ptr++;return EXEC_CONTINUE;}
-int exec_mem_left(){ptr--;return EXEC_CONTINUE;}
+int exec_mem_right(){
+    ptr++;
+    /*if move after allocated space,extend array*/
+    if(ptr-data >= data_size){
+        data_size+=block_size;
+        data=realloc(data,data_size);
+    }
+    
+    if(verbose)
+        printf("(%ld)< mem[%ld]:%c\n",(long)(cmd-code),(long)(ptr-data),*ptr);
+    return EXEC_CONTINUE;
+}
+int exec_mem_left(){
+    ptr--;
+    
+    /*
+    *data pointer cannot go below array
+    */
+    if(ptr<data){
+        printf("error:data underrun (%ld)< mem[%ld]\n",(long)(cmd-code),(long)(ptr-data));
+        execution_state=EXEC_STOPPED_ERR;
+        return EXEC_STOPPED_ERR;
+    }
+    if(verbose)
+        printf("(%ld)< mem[%ld]:%c\n",(long)(cmd-code),(long)(ptr-data),*ptr);
+    
+    return EXEC_CONTINUE;
+}
+
+
 int exec_getchar(){*ptr=getchar();return EXEC_CONTINUE;}
-int exec_putchar(){putchar(*ptr);return EXEC_CONTINUE;}
-int exec_inc_mem(){++*ptr;return EXEC_CONTINUE;}
-int exec_dec_mem(){--*ptr;return EXEC_CONTINUE;}
-int exec_putnum(){printf("%d ",*ptr);return EXEC_CONTINUE;}
+int exec_putchar(){ putchar(*ptr);return EXEC_CONTINUE;}
+int exec_inc_mem(){ ++*ptr;return EXEC_CONTINUE;}
+int exec_dec_mem(){ --*ptr;return EXEC_CONTINUE;}
+int exec_putnum() { printf("%d ",*ptr);return EXEC_CONTINUE;}
 int exec_from(){
     /*if *ptr=0 skip to matching closing bracket*/
     if(0==*ptr){
