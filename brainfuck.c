@@ -1,8 +1,12 @@
 #include<stdio.h>
 #include <stdlib.h>
+#define EXEC_CONTINUE
+#define EXEC_STOPPED_OK
+#define EXEC_STOPPED_ERR
+
 
 int verbose=0;
-
+char execution_state=EXEC_CONTINUE
 /*extend by that much the code/data arrays when needed*/
 size_t block_size=4096;
 
@@ -66,4 +70,26 @@ void read_program(){
                 }
         }
     }
+}
+
+
+/*
+* execute the program placed in code array unless an instruction causes
+* 
+*/
+int execute(){
+    execution_state=EXEC_CONTINUE;
+
+    while(EXEC_CONTINUE == execution_state){
+        exec_cmd();
+    }
+    
+    return execution_state;
+}
+
+/*
+*  execute the instruction at current cmd pointer
+*/
+exec_cmd(){
+    
 }
