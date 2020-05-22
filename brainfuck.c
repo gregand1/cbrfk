@@ -8,8 +8,15 @@
 void read_program();
 int execute();
 int exec_cmd();
-
-
+int exec_mem_right();
+int exec_mem_left();
+int exec_getchar();
+int exec_putchar();
+int exec_inc_mem();
+int exec_dec_mem();
+int exec_putnum();
+int exec_from();
+int exec_to();
 
 int verbose=0;
 char execution_state=EXEC_CONTINUE
@@ -109,6 +116,9 @@ int exec_cmd(){
         case '.': exec_putchar();   break;
         case ',': exec_getchar();   break;
         case ':': exec_putnum();    break;
+        case '[': exec_from();      break;
+        case ']': exec_to();        break;
+            
         case EOF:
             /*reached program end? return execution complete*/
             execution_state= EXEC_STOPPED_OK;
@@ -120,3 +130,14 @@ int exec_cmd(){
     cmd++;
     return execution_state;
 }
+
+
+int exec_mem_right(){}
+int exec_mem_left(){}
+int exec_getchar(){}
+int exec_putchar(){}
+int exec_inc_mem(){}
+int exec_dec_mem(){}
+int exec_putnum(){}
+int exec_from(){}
+int exec_to(){}
