@@ -139,5 +139,16 @@ int exec_putchar(){putchar(*ptr);}
 int exec_inc_mem(){++*ptr;}
 int exec_dec_mem(){--*ptr;}
 int exec_putnum(){printf("%d ",*ptr);}
-int exec_from(){}
-int exec_to(){}
+int exec_from(){
+    /*if *ptr=0 skip to matching closing bracket*/
+    if(0==*ptr){
+        cmd=seek_closing_bracket();
+    }
+}
+
+int exec_to(){
+    /*if *ptr!=0 seek backwards matching opening bracket*/
+    if(0!=*ptr){
+        cmd=seek_opening_bracket();
+    }
+}
