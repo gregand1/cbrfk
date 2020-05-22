@@ -1,9 +1,9 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-#define EXEC_CONTINUE
-#define EXEC_STOPPED_OK
-#define EXEC_STOPPED_ERR
+#define EXEC_CONTINUE 0
+#define EXEC_STOPPED_OK 1
+#define EXEC_STOPPED_ERR 2
 
 void read_program();
 int execute();
