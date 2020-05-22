@@ -1,5 +1,6 @@
 #include<stdio.h>
-#include <stdlib.h>
+#include<stdlib.h>
+
 #define EXEC_CONTINUE
 #define EXEC_STOPPED_OK
 #define EXEC_STOPPED_ERR
@@ -88,8 +89,29 @@ int execute(){
 }
 
 /*
-*  execute the instruction at current cmd pointer
+*  execute the instruction at current cmd pointer and move to next
+*  returns execution state after completing instruction
+*  (continue/finished ok/error)
 */
-exec_cmd(){
-    
+int exec_cmd(){
+
+    switch(*cmd){
+        /*instructions without problem return continue_execution*/
+        case '>': exec_mem_right(); break;
+        case '<': exec_mem_left();  break;
+        case '+': exec_inc_mem();   break;
+        case '-': exec_dec_mem();   break;
+        case '.': exec_putchar();   break;
+        case ',': exec_getchar();   break;
+        case ':': exec_putnum();    break;
+        case EOF:
+            /*reached program end? return execution complete*/
+            execution_state= EXEC_STOPPED_OK;
+
+        default :;
+           /*ignore other characters*/
+    }
+    /*move to next instruction*/
+    cmd++;
+    return execution_state;
 }
