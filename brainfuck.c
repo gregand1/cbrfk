@@ -41,7 +41,7 @@ int main(int argc,char**argv){
 }
 
 
-read_program(){
+void read_program(){
    
     while(1){
         /*write instruction chars from input to code array*/
