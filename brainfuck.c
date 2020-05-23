@@ -5,19 +5,9 @@
 #define EXEC_STOPPED_OK 2
 
 
-void print_exec_state();
-char* seek_closing_bracket(char*tmp);
-char* seek_opening_bracket(char*tmp);
 void read_program();
-void zeros(char*arr,size_t len);
-
-//begin execution of program at char*cmd
 int execute();
-
-//execute current instruction my dude
 int exec_cmd();
-
-//functions for every available instruction
 int exec_mem_right();
 int exec_mem_left();
 int exec_getchar();
@@ -27,8 +17,11 @@ int exec_dec_mem();
 int exec_putnum();
 int exec_from();
 int exec_to();
+char* seek_closing_bracket();
+char* seek_opening_bracket();
 
-
+void zeros(char*arr,size_t len);
+void print_exec_state();
 
 char execution_state=EXEC_CONTINUE;
 char verbose=0;
@@ -131,7 +124,7 @@ int exec_cmd(){
 }
 
 
-char* seek_closing_bracket(char* cmd){
+char* seek_closing_bracket(){
     char*tmp=cmd;
     int scope=1;
 
@@ -148,7 +141,7 @@ char* seek_closing_bracket(char* cmd){
     return tmp;
 }
 
-char* seek_opening_bracket(char*cmd){
+char* seek_opening_bracket(){
     char*tmp=cmd;
     int scope=1;
 
