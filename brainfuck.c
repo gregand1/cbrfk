@@ -1,5 +1,12 @@
+/*
+*   grandr1
+*   a c brainfuck interpreter
+*
+*   if anybody asks,cbrfk has gnu3 licence
+*/
 #include<stdio.h>
 #include <stdlib.h>
+
 #define EXEC_CONTINUE 0
 #define EXEC_STOPPED_ERR 1
 #define EXEC_STOPPED_OK 2
