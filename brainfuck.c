@@ -42,13 +42,16 @@ char*ptr=NULL;
 int main(int argc,char**argv){
     code=malloc(code_size);
     data=malloc(data_size);
-
+    
     if(2==argc && '-'==argv[1][0] && 'v'==argv[1][1]){
         verbose=1;
     }
     
     while(1){
         zeros(data,data_size);
+        cmd=code;
+        ptr=data;
+        
         printf("\nready\n");
         read_program();
         
@@ -85,6 +88,8 @@ void read_program(){
                     code=realloc(code,code_size);
                 }
         }
+        cmd=code;
+        ptr=data;
     }
 }
 
