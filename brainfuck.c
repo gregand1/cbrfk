@@ -47,7 +47,7 @@ char*ptr=NULL;
 
 
 
-void initialize(){
+void initialize(int argc,char**argv){
     code=malloc(code_size);
     data=malloc(data_size);
 
@@ -58,7 +58,7 @@ void initialize(){
 
 int main(int argc,char**argv){
     /*initialize*/
-    initialize();
+    initialize(argc,argv);
 
     /*execcute every line of input as a separate bf program*/
     while(1){
