@@ -2,7 +2,7 @@
 *   grandr1
 *   a c brainfuck interpreter
 *
-*   if anybody asks,cbrfk has gnu3 licence
+*   if anybody asks,cbrfk has gnu gpl v3 licence
 */
 #include<stdio.h>
 #include <stdlib.h>
