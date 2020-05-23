@@ -23,31 +23,42 @@ char* seek_opening_bracket();
 void zeros(char*arr,size_t len);
 void print_exec_state();
 
+/*
+* program state:execute/finished ok/finished with error
+*/
 char execution_state=EXEC_CONTINUE;
 char verbose=0;
+
+/*array extension step*/
 size_t block_size=4096;
 
-
+/* "code segment" */
 char *code=NULL;
 size_t code_size=32768;
+/*current instruction pointer*/
 char*cmd=NULL;
 
-
+/*"data segment*/
 char *data=NULL;
 size_t data_size=32768;
-
+/*current memory pos. pointer*/
 char*ptr=NULL;
 
 
 
-int main(int argc,char**argv){
+
+void initialize(){
     code=malloc(code_size);
     data=malloc(data_size);
 
     if(2==argc && '-'==argv[1][0] && 'v'==argv[1][1]){
         verbose=1;
     }
+}
 
+int main(int argc,char**argv){
+    /*initialize*/
+    initialize();
 
     while(1){
         zeros(data,data_size);
