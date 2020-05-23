@@ -1,13 +1,23 @@
 #include<stdio.h>
-#include<stdlib.h>
-
+#include <stdlib.h>
 #define EXEC_CONTINUE 0
-#define EXEC_STOPPED_OK 1
-#define EXEC_STOPPED_ERR 2
+#define EXEC_STOPPED_ERR 1
+#define EXEC_STOPPED_OK 2
 
+
+void print_exec_state();
+char* seek_closing_bracket(char*tmp);
+char* seek_opening_bracket(char*tmp);
 void read_program();
+void zeros(char*arr,size_t len);
+
+//begin execution of program at char*cmd
 int execute();
+
+//execute current instruction my dude
 int exec_cmd();
+
+//functions for every available instruction
 int exec_mem_right();
 int exec_mem_left();
 int exec_getchar();
@@ -17,194 +27,133 @@ int exec_dec_mem();
 int exec_putnum();
 int exec_from();
 int exec_to();
-char*seek_closing_bracket();
-char*seek_opening_bracket();
-void zeros(char*arr,size_t len);
 
-int verbose=0;
+
+
 char execution_state=EXEC_CONTINUE;
-/*extend by that much the code/data arrays when needed*/
+char verbose=0;
 size_t block_size=4096;
 
-/*code = instructions array*/
+
 char *code=NULL;
 size_t code_size=32768;
-/*instruction ptr = program counter*/
 char*cmd=NULL;
 
-/*program memory */
+
 char *data=NULL;
 size_t data_size=32768;
 
-/*program pointer*/
 char*ptr=NULL;
+
+
 
 int main(int argc,char**argv){
     code=malloc(code_size);
     data=malloc(data_size);
-    
+
     if(2==argc && '-'==argv[1][0] && 'v'==argv[1][1]){
         verbose=1;
     }
-    
+
+
     while(1){
         zeros(data,data_size);
-        cmd=code;
-        ptr=data;
         
+        ptr=data;
+        cmd=code;
+
         printf("\nready\n");
         read_program();
         
         execute();
         printf("\nexecution complete\n");
+
         zeros(code,code_size);
     }
 
-  return 0;
+    return 0;
 }
 
+int execute(){
+    execution_state=EXEC_CONTINUE;
+
+    while(EXEC_CONTINUE==execution_state){
+        exec_cmd();
+    }
+    return execution_state;
+}
 
 void read_program(){
-   
+    size_t i=0;
     while(1){
-        /*write instruction chars from input to code array*/
-        *cmd=getchar();
+        *cmd = getchar();
         switch(*cmd){
-            /*char was a closing char?replace with eof and return*/
-            case EOF:
+
             case '\0':
             case '\r':
             case '\n':
                 *cmd=EOF;
-                code_size=cmd-code;
+                code_size = cmd-code;
+                cmd=code;
                 return;
             default:
-                /*char was any other? move to next instruction position*/
-                 cmd++;
-                 
-                /*reached end of code array? extend*/
-                if(cmd-code>=code_size){
+                cmd++;
+                if(cmd-code >= code_size){
                     code_size+=block_size;
                     code=realloc(code,code_size);
                 }
         }
-        cmd=code;
-        ptr=data;
     }
 }
 
 
-/*
-* execute the program placed in code array unless an instruction causes
-* 
-*/
-int execute(){
-    execution_state=EXEC_CONTINUE;
 
-    while(EXEC_CONTINUE == execution_state){
-        exec_cmd();
-    }
-    
-    return execution_state;
-}
-
-/*
-*  execute the instruction at current cmd pointer and move to next
-*  returns execution state after completing instruction
-*  (continue/finished ok/error)
-*/
 int exec_cmd(){
 
     switch(*cmd){
-        /*instructions without problem return continue_execution*/
-        case '>': exec_mem_right(); break;
-        case '<': exec_mem_left();  break;
-        case '+': exec_inc_mem();   break;
-        case '-': exec_dec_mem();   break;
-        case '.': exec_putchar();   break;
-        case ',': exec_getchar();   break;
-        case ':': exec_putnum();    break;
-        case '[': exec_from();      break;
-        case ']': exec_to();        break;
-            
+        case '>':exec_mem_right();break;
+        case '<': exec_mem_left();break;
+        case '+': exec_inc_mem(); break;
+        case '-': exec_dec_mem(); break;
+        case '.': exec_putchar(); break;
+        case ',': exec_getchar(); break;
+        case ':': exec_putnum();  break;
+        case '[': exec_from();    break;
+        case ']': exec_to();      break;
         case EOF:
-            /*reached program end? return execution complete*/
             execution_state= EXEC_STOPPED_OK;
 
         default :;
            /*ignore other characters*/
     }
-    /*move to next instruction*/
     cmd++;
-    return execution_state;
-}
-
-
-int exec_mem_right(){
-    ptr++;
-    /*if move after allocated space,extend array*/
-    if(ptr-data >= data_size){
-        data_size+=block_size;
-        data=realloc(data,data_size);
-    }
-    
-    if(verbose)
-        printf("(%ld)< mem[%ld]:%c\n",(long)(cmd-code),(long)(ptr-data),*ptr);
-    return EXEC_CONTINUE;
-}
-int exec_mem_left(){
-    ptr--;
-    
-    /*
-    *data pointer cannot go below array
-    */
-    if(ptr<data){
-        printf("error:data underrun (%ld)< mem[%ld]\n",(long)(cmd-code),(long)(ptr-data));
-        execution_state=EXEC_STOPPED_ERR;
-        return EXEC_STOPPED_ERR;
-    }
-    if(verbose)
-        printf("(%ld)< mem[%ld]:%c\n",(long)(cmd-code),(long)(ptr-data),*ptr);
-    
     return EXEC_CONTINUE;
 }
 
 
-int exec_getchar(){*ptr=getchar();return EXEC_CONTINUE;}
-int exec_putchar(){ putchar(*ptr);return EXEC_CONTINUE;}
-int exec_inc_mem(){ ++*ptr;return EXEC_CONTINUE;}
-int exec_dec_mem(){ --*ptr;return EXEC_CONTINUE;}
-int exec_putnum() { printf("%d ",*ptr);return EXEC_CONTINUE;}
-int exec_from(){
-    /*if *ptr=0 skip to matching closing bracket*/
-    if(0==*ptr){
-        cmd=seek_closing_bracket();
-        if(NULL==cmd)
-            return EXEC_STOPPED_ERR;
-    }
-    return EXEC_CONTINUE;
-}
-
-int exec_to(){
-    /*if *ptr!=0 seek backwards matching opening bracket*/
-    if(0!=*ptr){
-        cmd=seek_opening_bracket();
-        if(NULL==cmd)
-            return EXEC_STOPPED_ERR;
-    }
-    return EXEC_CONTINUE;
-}
-
-/*
-*simple dirty seek matching bracket
-*can be replaced by pre execution indexed jump table
-*/
-char*seek_opening_bracket(){
+char* seek_closing_bracket(char* cmd){
     char*tmp=cmd;
     int scope=1;
+
+    while(scope!=0){
+        tmp++;
+        switch(*tmp){
+            case ']':scope--;break;
+            case '[':scope++;break;
+            case EOF:
+            fprintf(stderr,"missing closing bracket (%ld);\n",(long)(cmd-code));
+            return NULL;
+        }
+    }
+    return tmp;
+}
+
+char* seek_opening_bracket(char*cmd){
+    char*tmp=cmd;
+    int scope=1;
+
     while(scope!=0){
         tmp--;
-        /*seek<start? underrun by mismatched bracket*/
         if(tmp<=code){
             fprintf(stderr,"missing opening bracket (%ld);\n",(long)(cmd-code));
             execution_state=EXEC_STOPPED_ERR;
@@ -218,24 +167,81 @@ char*seek_opening_bracket(){
     return tmp;
 }
 
-/*simple dirty seek matching*/
-char*seek_closing_bracket(){
-    char*tmp=cmd;
-    int scope=1;
 
-    while(scope!=0){
-        tmp++;
-        switch(*tmp){
-            case ']':scope--;break;
-            case '[':scope++;break;
-            case EOF:
-                fprintf(stderr,"missing closing bracket (%ld);\n",(long)(cmd-code));
-                return NULL;
-        }
+void zeros(char*arr,size_t len){
+    while(len-->0){
+        arr[len]=0;
     }
-    return tmp;  
 }
 
 
 
-void zeros(char*arr,size_t len){while(len-->0){arr[len]=0;}}
+
+int exec_mem_right(){
+++ ptr; 
+            if(ptr-data >= data_size){
+                data_size+=block_size;
+                data=realloc(data,data_size);
+            }
+            
+            if(verbose)
+                printf("(%ld)< mem[%ld]:%c\n",(long)(cmd-code),(long)(ptr-data),*ptr);
+    return EXEC_CONTINUE;           
+}
+
+
+int exec_mem_left(){
+    -- ptr;
+    
+    if(verbose)
+        printf("(%ld)< mem[%ld]:%c\n",(long)(cmd-code),(long)(ptr-data),*ptr);
+    
+    if(ptr<data){
+        printf("error:data underrun (%ld)< mem[%ld]\n",(long)(cmd-code),(long)(ptr-data));
+        execution_state=EXEC_STOPPED_ERR;
+        return EXEC_STOPPED_ERR;
+    }
+    return EXEC_CONTINUE;
+}
+
+int exec_inc_mem(){
+    ++*ptr;
+    return EXEC_CONTINUE;
+}
+int exec_dec_mem(){
+    --*ptr;
+    return EXEC_CONTINUE;
+}
+
+int exec_getchar(){
+    *ptr=getchar();
+    return EXEC_CONTINUE;
+}
+
+int exec_putchar(){
+    putchar(*ptr);
+    return EXEC_CONTINUE;
+}
+
+int exec_putnum(){
+    printf("%d ",*ptr);
+    return EXEC_CONTINUE;
+}
+
+int exec_from(){
+    if(0==*ptr){
+        cmd=seek_closing_bracket(cmd);
+        if(NULL==cmd)
+            return EXEC_STOPPED_ERR;
+    }
+    return EXEC_CONTINUE;
+}
+
+int exec_to(){
+    if(0!=*ptr){
+        cmd=seek_opening_bracket(cmd);
+        if(NULL==cmd)
+            return EXEC_STOPPED_ERR;
+        return EXEC_CONTINUE;
+    }
+}
