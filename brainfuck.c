@@ -1,5 +1,12 @@
+/*
+*   grandr1
+*   a c brainfuck interpreter
+*
+*   if anybody asks,cbrfk has gnu gpl v3 licence
+*/
 #include<stdio.h>
 #include <stdlib.h>
+
 #define EXEC_CONTINUE 0
 #define EXEC_STOPPED_ERR 1
 #define EXEC_STOPPED_OK 2
@@ -24,31 +31,36 @@ int link_brackets(char*code,char**links);
 void zeros(char*arr,size_t len);
 void print_exec_state();
 
-/*
-* program state:execute/finished ok/finished with error
-*/
+/*program state:  execute / finished ok / finished with error */
 char execution_state=EXEC_CONTINUE;
+
+/*-v sets verbose to 1 for detailed output about execution */
 char verbose=0;
 
-/*array extension step*/
-size_t block_size=4096;
 
-/* "code segment" */
-char *code=NULL;
+size_t block_size=4096;  /*array extension step*/
+
+
+char *code=NULL;         /* "code segment" */
 size_t code_size=32768;
-/*current instruction pointer*/
-char*cmd=NULL;
+char*cmd=NULL;           /*current instruction pointer*/
 
-/*"data segment*/
-char *data=NULL;
-size_t data_size=32768;
-/*current memory pos. pointer*/
-char*ptr=NULL;
+
 
 char**links=NULL;
 int lp=0;
 
+char *data=NULL;         /*"data segment*/
+size_t data_size=32768;
+char*ptr=NULL;           /*current memory pos. pointer*/
 
+
+
+
+/*
+*   allocate & init code/data arrays
+*   and anything else that runs once at start of the interpreter
+*/
 void initialize(int argc,char**argv){
     code=malloc(code_size);
     data=malloc(data_size);
@@ -59,6 +71,11 @@ void initialize(int argc,char**argv){
     }
 }
 
+
+/*
+*  initialize 
+*  reset data & ptr ,read line, execute as bf code ,repeat
+*/
 int main(int argc,char**argv){
     /*initialize*/
     initialize(argc,argv);
@@ -141,11 +158,13 @@ int execute(){
 
 /*
 *   execute a single instruction at *cmd
+*   update and return execution state
 */
 int exec_cmd(){
 
     switch(*cmd){
-        /*exec accordingly*/
+        /*cmd points to instruction? 
+          exec accordingly*/
         case '>':exec_mem_right();break;
         case '<': exec_mem_left();break;
         case '+': exec_inc_mem(); break;
@@ -156,14 +175,21 @@ int exec_cmd(){
         case '[': exec_from();    break;
         case ']': exec_to();      break;
         case EOF:
-            /*points to end of program?complete. change exec state*/
+        /*cmd points to end of program?
+          complete. change exec state*/
             execution_state= EXEC_STOPPED_OK;
-
+            break;
+            
         default :;
-           /*ignore other characters*/
+       /*cmd points to any other character?
+         ignore*/
+            break;
     }
+    
     /*move to next instruction*/
     cmd++;
+    
+    /*returns the execution state*/
     return execution_state;
 }
 
@@ -309,7 +335,7 @@ int exec_putnum(){
 }
 
 
-/*skip to closing bracket if ptr value=zero */
+/*skip forward to closing bracket if ptr value=zero */
 int exec_from(){
     if(0==*ptr){
         cmd=seek_closing_bracket(cmd);
@@ -318,14 +344,16 @@ int exec_from(){
     }
     return EXEC_CONTINUE;
 }
-/*return to opening bracket if ptr value=nonzero */
+
+
+/*return back to opening bracket if ptr value=nonzero */
 int exec_to(){
     if(0!=*ptr){
         cmd=seek_opening_bracket(cmd);
         if(NULL==cmd)
             return EXEC_STOPPED_ERR;
-        return EXEC_CONTINUE;
     }
+    return EXEC_CONTINUE;
 }
 
 
