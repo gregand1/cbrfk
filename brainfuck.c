@@ -17,9 +17,10 @@ int exec_dec_mem();
 int exec_putnum();
 int exec_from();
 int exec_to();
-char* seek_closing_bracket();
-char* seek_opening_bracket();
+char* seek_closing_bracket(char*);
+char* seek_opening_bracket(char*);
 
+int link_brackets(char*code,char**links);
 void zeros(char*arr,size_t len);
 void print_exec_state();
 
@@ -44,12 +45,14 @@ size_t data_size=32768;
 /*current memory pos. pointer*/
 char*ptr=NULL;
 
-
+char**links=NULL;
+int lp=0;
 
 
 void initialize(int argc,char**argv){
     code=malloc(code_size);
     data=malloc(data_size);
+    links=malloc(sizeof(char*)*code_size);
 
     if(2==argc && '-'==argv[1][0] && 'v'==argv[1][1]){
         verbose=1;
@@ -70,8 +73,11 @@ int main(int argc,char**argv){
 
         /*read bf program from input*/
         printf("\nready\n");
+
         read_program();
         
+        lp=link_brackets(code,links);
+
         /*execute program stored in code array*/
         execute();
         printf("\nexecution complete\n");
@@ -110,6 +116,7 @@ void read_program(){
                 if(cmd-code >= code_size){
                     code_size+=block_size;
                     code=realloc(code,code_size);
+                    links=realloc(links,sizeof(char*)*code_size);
                 }
         }
     }
@@ -165,7 +172,7 @@ int exec_cmd(){
 *   returns null if reaches end of code array without finding it
 *   returns address of closing bracket otherwise
 */
-char* seek_closing_bracket(){
+char* seek_closing_bracket_iter(){
     char*tmp=cmd;
     int scope=1;
 
@@ -189,7 +196,7 @@ char* seek_closing_bracket(){
 *   returns null if passes start of code array without finding it
 *   returns address of closing bracket otherwise
 */
-char* seek_opening_bracket(){
+char* seek_opening_bracket_iter(){
     char*tmp=cmd;
     int scope=1;
 
@@ -206,6 +213,31 @@ char* seek_opening_bracket(){
         }
     }
     return tmp;
+}
+
+
+char* seek_opening_bracket(char*cmd_ptr){
+    int i=1;
+    while(i<lp && links[i]!=cmd_ptr)
+        i+=2;
+    
+    
+    if(i>=lp)
+        return NULL;
+    else
+        return links[i-1];
+}
+
+char* seek_closing_bracket(char*cmd_ptr){
+    int i=0;
+    while(i<lp && links[i]!=cmd_ptr)
+        i+=2;
+    
+    
+    if(i>=lp)
+        return NULL;
+    else
+        return links[i+1];
 }
 
 /*reset an array to zeros */
@@ -294,4 +326,30 @@ int exec_to(){
             return EXEC_STOPPED_ERR;
         return EXEC_CONTINUE;
     }
+}
+
+
+
+int link_brackets(char*code,char**links){
+    char* stack[2000];
+    int sp=0;
+    int stack_size=0;
+    int i=0;
+    int lp=0;
+
+    while(EOF != code[i]){
+        switch(code[i]){
+            case '[':
+                stack[sp++]=code+i;
+                break;
+
+            case ']':
+                links[lp]=stack[--sp];
+                links[lp+1]=code+i;
+                lp+=2;
+                break;
+        }
+        i++;
+    }
+    return lp;
 }
