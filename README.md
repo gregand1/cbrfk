@@ -6,7 +6,7 @@ compile with gcc
 run with -v parameter for verbosity
 
 #brainfuck language synopsis:
-<> move ptr
-+- increase/decrease *ptr
+<> move ptr ;
++- increase/decrease *ptr ;
 ,.: *ptr=getchar(),putchar(*ptr),putnumber(*ptr);
-[...]:  while(*ptr!=0){....}
+[...]:  while(*ptr!=0){....} ;
